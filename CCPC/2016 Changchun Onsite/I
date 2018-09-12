@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef unsigned long long ll;
+const int maxn = 2e5+7;
+
+int n, q, a[maxn], root[maxn], cnt;
+int vis[maxn], ans[maxn];
+
+
+void init()
+{
+    memset(vis, false, sizeof(vis));
+    cnt=0;
+    memset(root, 0, sizeof(root));
+}
+
+struct node
+{
+    int l, r, sum;
+} t[maxn*40];
+
+void update(int l, int r, int &x, int y, int pos, int val)
+{
+    t[++cnt]=t[y], t[cnt].sum+=val, x=cnt;
+    if(l==r)
+        return;
+    int mid=(l+r)/2;
+    if(pos<=mid)
+        update(l, mid, t[x].l, t[y].l, pos, val);
+    else
+        update(mid+1, r, t[x].r, t[y].r, pos, val);
+}
+
+int query(int l, int r, int x, int qr)
+{
+    if(qr >= r)
+        return t[x].sum;
+    int mid=(l+r)/2;
+    if(qr<=mid)
+        return query(l, mid, t[x].l, qr);
+    else
+        return query(mid+1,r, t[x].r, qr)+t[t[x].l].sum;
+}
+
+int kth(int l, int r, int x, int k)
+{
+    if(l==r)
+        return l;
+    int mid=(l+r)/2;
+    if(t[t[x].l].sum >= k)
+        return kth(l, mid, t[x].l, k);
+    else
+        return kth(mid+1, r, t[x].r, k-t[t[x].l].sum);
+}
+
+int main()
+{
+    int T, cas=0;
+    scanf("%d", &T);
+    while(T--)
+    {
+        init();
+        scanf("%d%d", &n, &q);
+        for(int i=1; i<=n; i++)
+            scanf("%d", &a[i]);
+        for(int i=n; i>=1; i--)
+        {
+            if(!vis[a[i]])
+                update(1, n, root[i], root[i+1], i, 1);
+            else
+            {
+                int x;
+                update(1, n,  root[i], root[i+1], vis[a[i]], -1);
+                update(1, n,  root[i], root[i], i, 1);
+            }
+            vis[a[i]]=i;
+        }
+        ans[0]=0;
+        for(int i=1; i<=q; i++)
+        {
+            int ql, qr;
+            scanf("%d%d", &ql, &qr);
+            ql = (ql+ans[i-1])%n+1;
+            qr = (qr+ans[i-1])%n+1;
+            if(ql>qr)
+                swap(ql, qr);
+            int mid = query(1, n, root[ql], qr);
+            int k=(mid+1)/2;
+            ans[i]= kth(1, n, root[ql], k);
+        }
+        printf("Case #%d: ",++cas);
+        for(int i=1; i<=q; i++)
+        {
+            printf("%d%c", ans[i], i==q?'\n':' ');
+        }
+    }
+    return 0;
+}
