@@ -1,0 +1,58 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef unsigned long long ll;
+const int maxn = 1e5+7;
+
+
+int n, q, a[maxn], root[maxn], cnt;
+int vis[maxn*10];
+
+struct node
+{
+    int l, r, sum;
+}t[maxn*40];
+
+void update(int l, int r, int &x, int y, int pos, int val)
+{
+    t[++cnt]=t[y], t[cnt].sum+=val, x=cnt;
+    if(l==r) return;
+    int mid=(l+r)/2;
+    if(pos<=mid) update(l, mid, t[x].l, t[y].l, pos, val);
+    else update(mid+1, r, t[x].r, t[y].r, pos, val);
+}
+
+
+int query(int l, int r, int x, int ql)
+{
+    if(ql == l) return t[x].sum;
+    int mid=(l+r)/2;
+    if(ql<=mid) return query(l, mid, t[x].l, ql)+t[t[x].r].sum;
+    else  return query(mid+1,r, t[x].r, ql);
+}
+
+int main()
+{
+    scanf("%d", &n);
+    for(int i=1;i<=n;i++)
+    {
+        scanf("%d", &a[i]);
+        if(!vis[a[i]])
+        {
+            update(1, 1000000, root[i], root[i-1], i, 1);
+        }
+        else
+        {
+            int x;
+            update(1, 1000000,  x, root[i-1], vis[a[i]], -1);
+            update(1, 1000000, root[i], x, i, 1);
+        }
+        vis[a[i]]=i;
+    }
+    scanf("%d", &q);
+    while(q--)
+    {
+        int ql, qr;
+        scanf("%d%d", &ql, &qr);
+        printf("%d\n", query(1, 1000000, root[qr], ql));
+    }
+}
