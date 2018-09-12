@@ -1,0 +1,63 @@
+
+#include<stdio.h>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+typedef unsigned long long ll;
+const int maxn = 1e5+7;
+
+int root[maxn], n,  m, a[maxn], cnt;
+int ql, qr, k;
+int b[maxn];
+
+struct node
+{
+    int l, r, sum;
+}t[maxn*40];
+
+void update(int l, int r, int &x, int y, int pos)
+{
+    t[++cnt]=t[y], t[cnt].sum++, x=cnt;
+    if(l==r)  return;
+    int mid = (l+r)>>1;
+    if(pos<=mid)  update(l, mid, t[x].l, t[y].l, pos);
+    else          update(mid+1, r, t[x].r, t[y].r, pos);
+}
+
+int query(int l,int r,int x,int y,int pos)
+{
+    if(l==r)
+        return l;
+    int sum=t[t[y].l].sum-t[t[x].l].sum;
+    int mid=(l+r)/2;
+    if(pos<=sum) return query(l, mid, t[x].l, t[y].l, pos);
+    else return query(mid+1,r,t[x].r, t[y].r, pos-sum);
+}
+
+int main()
+{
+    scanf("%d%d", &n, &m);
+    for(int i=1;i<=n;i++)
+    {
+        scanf("%d", &a[i]);
+        b[i]=a[i];
+    }
+    sort(b+1, b+n+1);
+    int p=unique(b+1, b+n+1)-b;
+    for(int i=1;i<=n;i++)
+    {
+        int pos=lower_bound(b+1,b+p,a[i])-b;
+        a[i]=pos;
+    }
+    for(int i=1;i<=n;i++)
+    {
+        update(1,p-1,root[i], root[i-1], a[i]);
+    }
+    while(m--)
+    {
+        scanf("%d%d%d", &ql, &qr, &k);
+        printf("%d\n", b[query(1, n, root[ql-1], root[qr], k)]);
+    }
+    return 0;
+}
+
