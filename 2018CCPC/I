@@ -1,0 +1,106 @@
+// 爆搜gg
+
+// 正解：01背包做dp
+
+#include<bits/stdc++.h>
+#define mp make_pair
+#define fi first
+#define se second
+#define debug(x) cerr<<#x<<" = "<<(x)<<endl
+#define eps 1e-8
+#define pi acos(-1.0)
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+const int MAXN=(int)1e5+5;
+const int MOD=(int)1e9+7;
+int dp[1<<15|5],sum[1<<15|5],f[1<<15|5];
+int a[20];
+int main()
+{
+    int t;
+    scanf("%d",&t);
+    while(t--){
+        int n;
+        scanf("%d",&n);
+        for(int i=0;i<(1<<n);i++){
+            dp[i]=1;
+            sum[i]=f[i]=0;
+        }
+        for(int i=1;i<=n;i++)scanf("%d",&a[i]);
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<(1<<n);j++){
+                if(j&(1<<(i-1)))sum[j]+=a[i];
+            }
+        }
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<(1<<n);j++){
+                if(j&(1<<(i-1))){
+                    if(sum[j]-a[i]==a[i])f[j]++;
+                }
+            }
+        }
+        for(int i=1;i<(1<<n);i++){
+            int k=(1<<n)-1-i;
+            for(int j=k;;j=(j-1)&k){
+                dp[i|j]+=dp[j]*f[i];
+                if(j==0)break;
+            }
+        }
+        printf("%d\n",dp[(1<<n)-1]);
+    }
+    return 0;
+}
+
+//js代码
+
+#include <bits/stdc++.h>
+using namespace std;
+vector <int> vec;
+int dp[50005];
+int num[20];
+int main()
+{
+    int t,n;
+    int maxx,temp;
+    int ans;
+    scanf("%d",&t);
+    while(t--)
+    {
+        memset(dp,0,sizeof(dp));
+        vec.clear();
+        ans=0;
+        scanf("%d",&n);
+        for(int i=0;i<n;i++)
+            scanf("%d",&num[i]);
+        maxx=(1<<n)-1;
+        for(int i=1;i<maxx;i++)
+        {
+            temp=0;
+            for(int j=0;j<n;j++)
+            {
+                if(i&(1<<j))
+                    temp+=num[j];
+            }
+            for(int j=0;j<n;j++)
+            {
+                if(!(i&(1<<j)) && num[j]==temp)
+                    vec.push_back(i|(1<<j));
+            }
+        }
+        dp[0]=1;
+        for(int i=0;i<vec.size();i++)
+        {
+            for(int j=maxx;j>=0;j--)
+            {
+                if(dp[j] && !(vec[i]&j))
+                    dp[j|vec[i]]+=dp[j];
+            }
+        }
+        for(int j=maxx;j>=0;j--)
+            ans+=dp[j];
+        printf("%d\n",ans);
+    }
+    return 0;
+}
